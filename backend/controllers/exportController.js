@@ -48,6 +48,7 @@ async function exportData(req, res, next) {
       res.setHeader('Content-Disposition', 'attachment; filename="weather_records.json"');
       return res.json({
         exported_at: new Date().toISOString(),
+        timezone: 'UTC (ISO 8601)',
         author: 'Mrunal Kotkar',
         total: flat.length,
         records: flat,
@@ -59,6 +60,7 @@ async function exportData(req, res, next) {
       const root = createXml({ version: '1.0' })
         .ele('WeatherRecords', {
           exportedAt: new Date().toISOString(),
+          timezone: 'UTC (ISO 8601)',
           author: 'Mrunal Kotkar',
           total: flat.length,
         });
@@ -120,7 +122,8 @@ async function exportData(req, res, next) {
       doc.fontSize(20).font('Helvetica-Bold').text('Weather Records Export', { align: 'center' });
       doc.moveDown(0.5);
       doc.fontSize(10).font('Helvetica').text(`Author: Mrunal Kotkar`, { align: 'center' });
-      doc.text(`Exported: ${new Date().toLocaleString()}`, { align: 'center' });
+      doc.text(`Exported: ${new Date().toISOString()} (UTC)`, { align: 'center' });
+      doc.text(`All timestamps are in UTC (ISO 8601)`, { align: 'center' });
       doc.text(`Total Records: ${flat.length}`, { align: 'center' });
       doc.moveDown(1);
 

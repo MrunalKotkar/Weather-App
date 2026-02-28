@@ -31,10 +31,10 @@ export default function FiveDayForecast({ data }) {
     <div className="forecast-section">
       <h2 className="section-title">📅 5-Day Forecast — {resolvedName}</h2>
       <div className="forecast-grid">
-        {days.map((item, idx) => {
+        {days.map((item) => {
           const date = new Date(item.dt_txt);
-          const dayName = idx === 0 ? 'Today' : DAY_NAMES[date.getDay()];
-          const dateStr = `${date.getDate()} ${MONTH_NAMES[date.getMonth()]}`;
+          const dayName = DAY_NAMES[date.getUTCDay()];
+          const dateStr = `${date.getUTCDate()} ${MONTH_NAMES[date.getUTCMonth()]}`;
           const icon = item.weather?.[0]?.icon;
           const desc = item.weather?.[0]?.description ?? '';
           const colorClass = getWeatherClass(icon);

@@ -116,8 +116,9 @@ export default function RecordForm({ existing, onSuccess, onCancel }) {
         </div>
 
         <p className="form-note">
-          ℹ️ Weather data (temperature, humidity, wind) will be automatically fetched from
-          OpenWeatherMap and stored in the database.
+          ℹ️ Weather data is fetched automatically from OpenWeatherMap and saved to the database.
+          For best results, use dates within the <strong>next 5 days</strong> (forecast window).
+          Past dates will use current weather as a reference value.
         </p>
 
         <div className="form-actions">

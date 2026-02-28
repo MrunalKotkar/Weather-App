@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { getApiBase } from '../services/api';
 
 const FORMATS = [
-  { id: 'json', label: 'JSON', icon: '{ }', desc: 'Machine-readable structured format' },
-  { id: 'xml', label: 'XML', icon: '< />', desc: 'Extensible Markup Language' },
+  { id: 'json', label: 'JSON', icon: '🗂️', desc: 'Machine-readable structured format' },
+  { id: 'xml', label: 'XML', icon: '📋', desc: 'Extensible Markup Language' },
   { id: 'csv', label: 'CSV', icon: '📊', desc: 'Comma-separated, opens in Excel' },
   { id: 'pdf', label: 'PDF', icon: '📄', desc: 'Formatted document for printing' },
 ];
@@ -83,6 +83,7 @@ export default function ExportPanel() {
         <h3>📌 Notes</h3>
         <ul>
           <li>All exports contain the same data — choose the format that fits your use case.</li>
+          <li>All timestamps in exported files are in <strong>UTC (ISO 8601)</strong>.</li>
           <li>If there are no records, the export will be empty but still valid.</li>
           <li>Raw API JSON payloads are excluded to keep file sizes manageable.</li>
           <li>Go to the <strong>Records</strong> tab to create, edit, or delete records before exporting.</li>

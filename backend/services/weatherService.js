@@ -80,6 +80,9 @@ async function getCurrentWeather(locationInput) {
 
 /**
  * Get 5-day / 3-hour forecast.
+ * - Skips today so the first card is always Tomorrow.
+ * - Aggregates ALL 3-hour slots per day to compute true daily min/max.
+ * - Uses the noon slot (12:00) as the representative for icon/description.
  */
 async function getForecast(locationInput) {
   const { lat, lon, resolvedName } = await resolveLocation(locationInput);
@@ -87,22 +90,46 @@ async function getForecast(locationInput) {
     params: { lat, lon, appid: API_KEY, units: 'metric', cnt: 40 },
   });
 
-  // Group by day (take the noon reading if available, else first of day)
+  // Today's date string in UTC (OWM dt_txt is in UTC)
+  const todayUtc = new Date().toISOString().split('T')[0];
+
+  // Group by calendar day, skipping today
   const byDay = {};
   for (const item of resp.data.list) {
     const day = item.dt_txt.split(' ')[0];
-    if (!byDay[day]) byDay[day] = item;
-    else if (item.dt_txt.includes('12:00:00')) byDay[day] = item;
+    if (day === todayUtc) continue; // skip today — first day shown will be tomorrow
+
+    if (!byDay[day]) {
+      byDay[day] = {
+        representative: item,          // will be replaced by noon slot if found
+        temp_min: item.main.temp,      // track true daily min across all slots
+        temp_max: item.main.temp,      // track true daily max across all slots
+      };
+    } else {
+      // Prefer the noon reading as the "face" of the day (icon, description, humidity)
+      if (item.dt_txt.includes('12:00:00')) byDay[day].representative = item;
+      if (item.main.temp < byDay[day].temp_min) byDay[day].temp_min = item.main.temp;
+      if (item.main.temp > byDay[day].temp_max) byDay[day].temp_max = item.main.temp;
+    }
   }
 
-  const days = Object.values(byDay).slice(0, 5);
+  // Merge aggregated min/max back onto each representative item
+  const days = Object.values(byDay).slice(0, 5).map(({ representative, temp_min, temp_max }) => ({
+    ...representative,
+    main: {
+      ...representative.main,
+      temp_min: parseFloat(temp_min.toFixed(1)),
+      temp_max: parseFloat(temp_max.toFixed(1)),
+    },
+  }));
+
   return { resolvedName, lat, lon, days, city: resp.data.city };
 }
 
 /**
  * Get temperature statistics for a date range.
- * OWM free tier doesn't support historical data — we use the 5-day forecast
- * for future dates and flag past dates accordingly.
+ * OWM free tier = 5-day forecast only. For date ranges outside that window,
+ * we fall back to current weather so the record is still created with real data.
  */
 async function getWeatherForDateRange(locationInput, dateFrom, dateTo) {
   const { lat, lon, resolvedName } = await resolveLocation(locationInput);
@@ -117,6 +144,31 @@ async function getWeatherForDateRange(locationInput, dateFrom, dateTo) {
     const d = new Date(item.dt_txt);
     return d >= from && d <= to;
   });
+
+  // If no forecast slots fall in range (e.g. past dates), fall back to current weather
+  if (inRange.length === 0) {
+    const currentResp = await axios.get(`${BASE_URL}/data/2.5/weather`, {
+      params: { lat, lon, appid: API_KEY, units: 'metric' },
+    });
+    const cur = currentResp.data;
+    return {
+      resolvedName,
+      lat,
+      lon,
+      dateFrom,
+      dateTo,
+      temperature_min: parseFloat((cur.main.temp_min ?? cur.main.temp).toFixed(2)),
+      temperature_max: parseFloat((cur.main.temp_max ?? cur.main.temp).toFixed(2)),
+      temperature_avg: parseFloat(cur.main.temp.toFixed(2)),
+      humidity: cur.main.humidity ?? null,
+      wind_speed: cur.wind?.speed ?? null,
+      description: cur.weather?.[0]?.description ?? null,
+      weather_icon: cur.weather?.[0]?.icon ?? null,
+      weather_data: cur,
+      dataPoints: 1,
+      note: 'Date range outside forecast window — current weather used as reference.',
+    };
+  }
 
   let tempMin = null, tempMax = null, tempSum = 0, count = 0;
   for (const item of inRange) {

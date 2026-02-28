@@ -5,6 +5,29 @@ function WindDirection(deg) {
   return dirs[Math.round(deg / 45) % 8];
 }
 
+/**
+ * Format a Unix timestamp in the CITY's local timezone (using OWM's timezone offset).
+ * e.g. sunrise/sunset will show correct local time regardless of browser timezone.
+ */
+function formatInCityTz(unixSeconds, tzOffsetSeconds) {
+  if (!unixSeconds) return '—';
+  // Shift to city local time, then read as UTC
+  const d = new Date((unixSeconds + tzOffsetSeconds) * 1000);
+  const h = String(d.getUTCHours()).padStart(2, '0');
+  const m = String(d.getUTCMinutes()).padStart(2, '0');
+  return `${h}:${m}`;
+}
+
+/** Format timezone offset as "UTC+05:30" */
+function tzLabel(offsetSeconds) {
+  if (offsetSeconds == null) return 'UTC';
+  const sign = offsetSeconds >= 0 ? '+' : '-';
+  const abs = Math.abs(offsetSeconds);
+  const h = String(Math.floor(abs / 3600)).padStart(2, '0');
+  const m = String(Math.floor((abs % 3600) / 60)).padStart(2, '0');
+  return `UTC${sign}${h}:${m}`;
+}
+
 export default function CurrentWeather({ data }) {
   if (!data) return null;
 
@@ -17,14 +40,16 @@ export default function CurrentWeather({ data }) {
   const displayName = resolvedName || `${name}, ${sys?.country}`;
   const desc = weather?.[0]?.description ?? '';
   const icon = weather?.[0]?.icon;
-  const localTime = new Date((dt + timezone) * 1000).toUTCString().replace(' GMT', ' local');
+  const tz = timezone ?? 0;
+  const localTime = formatInCityTz(dt, tz);
+  const tzStr = tzLabel(tz);
 
   return (
     <div className="current-weather-card">
       <div className="cw-top">
         <div className="cw-location">
           <h2 className="cw-city">📍 {displayName}</h2>
-          <p className="cw-time">🕐 {localTime}</p>
+          <p className="cw-time">🕐 Local time {localTime} <span className="cw-tz">({tzStr})</span></p>
         </div>
         {icon && (
           <img
@@ -51,8 +76,8 @@ export default function CurrentWeather({ data }) {
           { label: 'Visibility', val: visibility ? `${(visibility / 1000).toFixed(1)} km` : '—', icon: '👁' },
           { label: 'Cloud Cover', val: `${clouds?.all ?? '—'}%`, icon: '☁️' },
           { label: 'Pressure', val: `${main?.pressure ?? '—'} hPa`, icon: '🌡' },
-          { label: 'Sunrise', val: sys?.sunrise ? new Date(sys.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—', icon: '🌅' },
-          { label: 'Sunset', val: sys?.sunset ? new Date(sys.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—', icon: '🌇' },
+          { label: 'Sunrise', val: sys?.sunrise ? `${formatInCityTz(sys.sunrise, tz)} (${tzStr})` : '—', icon: '🌅' },
+          { label: 'Sunset', val: sys?.sunset ? `${formatInCityTz(sys.sunset, tz)} (${tzStr})` : '—', icon: '🌇' },
         ].map(({ label, val, icon: ico }) => (
           <div key={label} className="cw-stat-item">
             <span className="cw-stat-icon">{ico}</span>
