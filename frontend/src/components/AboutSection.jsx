@@ -23,7 +23,7 @@ export default function AboutSection() {
           <div>
             <h2>Product Manager Accelerator</h2>
             <a
-              href="https://www.linkedin.com/company/product-manager-accelerator/"
+              href="https://www.linkedin.com/school/pmaccelerator/"
               target="_blank"
               rel="noopener noreferrer"
               className="pm-link"
@@ -34,15 +34,15 @@ export default function AboutSection() {
         </div>
 
         <p>
-          <strong>Product Manager Accelerator (PMA)</strong> is the world's first and most
-          comprehensive Product Management career accelerator. PMA helps aspiring and current
-          product managers break into top tech companies, advance their careers, and build
-          in-demand skills through structured programs, mentorship, and community.
+          <strong>Product Manager Accelerator (PMA)</strong> is the world's leading PM career
+          launch program. From zero experience to landing a PM role — PMA gives you a structured
+          path, real mentorship from senior PMs, and a community that actually helps you get hired.
         </p>
         <p>
-          With a community of over <strong>15,000+ members</strong> and alumni at companies like
-          Google, Meta, Amazon, Microsoft, and hundreds of top startups, PMA provides an
-          unparalleled network and proven frameworks for product success.
+          PMA has helped <strong>thousands of students</strong> break into product management at
+          companies like Google, Meta, Amazon, Microsoft, and top startups worldwide. Whether
+          you're switching careers or leveling up, PMA gives you the tools, network, and
+          confidence to make it happen.
         </p>
 
         <div className="pm-features">
@@ -87,7 +87,7 @@ export default function AboutSection() {
             { label: 'Weather API', val: 'OpenWeatherMap' },
             { label: 'Videos', val: 'YouTube Data API v3' },
             { label: 'Maps', val: 'Leaflet + OpenStreetMap' },
-            { label: 'Export', val: 'JSON, XML, CSV, PDF, Markdown' },
+            { label: 'Export', val: 'JSON, XML, CSV, PDF' },
           ].map((t) => (
             <div key={t.label} className="tech-item">
               <span className="tech-label">{t.label}</span>
