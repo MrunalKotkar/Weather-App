@@ -38,8 +38,8 @@ async function exportData(req, res, next) {
       wind_speed_mps: r.wind_speed,
       description: r.description,
       notes: r.notes,
-      created_at: r.created_at,
-      updated_at: r.updated_at,
+      created_at: r.created_at ? new Date(r.created_at).toISOString() : null,
+      updated_at: r.updated_at ? new Date(r.updated_at).toISOString() : null,
     }));
 
     // ── JSON ──
@@ -139,14 +139,14 @@ async function exportData(req, res, next) {
           doc.fontSize(9).font('Helvetica');
 
           const fields = [
-            ['Date Range', `${r.date_from} → ${r.date_to}`],
+            ['Date Range', `${r.date_from} - ${r.date_to}`],
             ['Coordinates', `${r.latitude}, ${r.longitude}`],
             ['Temp (min/avg/max °C)', `${r.temperature_min_c} / ${r.temperature_avg_c} / ${r.temperature_max_c}`],
             ['Humidity', `${r.humidity_percent}%`],
             ['Wind Speed', `${r.wind_speed_mps} m/s`],
-            ['Description', r.description],
+            ['Description', r.description || '—'],
             ['Notes', r.notes || '—'],
-            ['Created', r.created_at],
+            ['Created (UTC)', r.created_at || '—'],
           ];
 
           for (const [label, val] of fields) {

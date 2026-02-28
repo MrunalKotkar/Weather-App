@@ -90,14 +90,15 @@ async function getForecast(locationInput) {
     params: { lat, lon, appid: API_KEY, units: 'metric', cnt: 40 },
   });
 
-  // Today's date string in UTC (OWM dt_txt is in UTC)
-  const todayUtc = new Date().toISOString().split('T')[0];
+  const nowMs = Date.now();
 
-  // Group by calendar day, skipping today
+  // Skip individual slots that are already in the past.
+  // Grouping what remains gives the next 5 calendar days starting from the
+  // first future slot — this is "tomorrow" regardless of the user's timezone.
   const byDay = {};
   for (const item of resp.data.list) {
+    if (item.dt * 1000 <= nowMs) continue; // skip past/present slots
     const day = item.dt_txt.split(' ')[0];
-    if (day === todayUtc) continue; // skip today — first day shown will be tomorrow
 
     if (!byDay[day]) {
       byDay[day] = {
