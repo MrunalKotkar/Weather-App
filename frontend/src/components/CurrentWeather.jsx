@@ -1,0 +1,66 @@
+const ICON_BASE = 'https://openweathermap.org/img/wn';
+
+function WindDirection(deg) {
+  const dirs = ['N','NE','E','SE','S','SW','W','NW'];
+  return dirs[Math.round(deg / 45) % 8];
+}
+
+export default function CurrentWeather({ data }) {
+  if (!data) return null;
+
+  const {
+    resolvedName, name, sys,
+    main, weather, wind, visibility,
+    clouds, dt, timezone,
+  } = data;
+
+  const displayName = resolvedName || `${name}, ${sys?.country}`;
+  const desc = weather?.[0]?.description ?? '';
+  const icon = weather?.[0]?.icon;
+  const localTime = new Date((dt + timezone) * 1000).toUTCString().replace(' GMT', ' local');
+
+  return (
+    <div className="current-weather-card">
+      <div className="cw-top">
+        <div className="cw-location">
+          <h2 className="cw-city">📍 {displayName}</h2>
+          <p className="cw-time">🕐 {localTime}</p>
+        </div>
+        {icon && (
+          <img
+            className="cw-icon"
+            src={`${ICON_BASE}/${icon}@4x.png`}
+            alt={desc}
+            title={desc}
+          />
+        )}
+      </div>
+
+      <div className="cw-temp-row">
+        <span className="cw-temp">{Math.round(main?.temp ?? 0)}°C</span>
+        <span className="cw-desc">{desc.charAt(0).toUpperCase() + desc.slice(1)}</span>
+      </div>
+      <p className="cw-feels">Feels like {Math.round(main?.feels_like ?? 0)}°C</p>
+
+      <div className="cw-stats">
+        {[
+          { label: 'High', val: `${Math.round(main?.temp_max ?? 0)}°C`, icon: '🔺' },
+          { label: 'Low', val: `${Math.round(main?.temp_min ?? 0)}°C`, icon: '🔻' },
+          { label: 'Humidity', val: `${main?.humidity ?? '—'}%`, icon: '💧' },
+          { label: 'Wind', val: `${wind?.speed ?? '—'} m/s ${WindDirection(wind?.deg)}`, icon: '💨' },
+          { label: 'Visibility', val: visibility ? `${(visibility / 1000).toFixed(1)} km` : '—', icon: '👁' },
+          { label: 'Cloud Cover', val: `${clouds?.all ?? '—'}%`, icon: '☁️' },
+          { label: 'Pressure', val: `${main?.pressure ?? '—'} hPa`, icon: '🌡' },
+          { label: 'Sunrise', val: sys?.sunrise ? new Date(sys.sunrise * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—', icon: '🌅' },
+          { label: 'Sunset', val: sys?.sunset ? new Date(sys.sunset * 1000).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '—', icon: '🌇' },
+        ].map(({ label, val, icon: ico }) => (
+          <div key={label} className="cw-stat-item">
+            <span className="cw-stat-icon">{ico}</span>
+            <span className="cw-stat-label">{label}</span>
+            <span className="cw-stat-val">{val}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

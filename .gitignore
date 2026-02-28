@@ -1,0 +1,23 @@
+# Secrets — never commit these
+**/.env
+**/.env.local
+**/.env.production.local
+
+# Dependencies
+**/node_modules/
+
+# Build outputs
+frontend/dist/
+frontend/build/
+
+# Logs
+**/*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/settings.json
+.idea/
