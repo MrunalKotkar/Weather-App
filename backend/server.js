@@ -64,16 +64,20 @@ app.use(errorHandler);
 
 // ─── Database Sync & Server Start ─────────────────────────────────────────────
 (async () => {
+  // Always start the HTTP server so Railway health checks pass and
+  // weather / YouTube / map routes work even if DB is unavailable.
+  app.listen(PORT, () => {
+    console.log(`🚀  Server running on http://localhost:${PORT}`);
+  });
+
   try {
     await sequelize.authenticate();
     console.log('✅  Database connection established successfully.');
     await sequelize.sync({ alter: true });
     console.log('✅  Database models synced.');
-    app.listen(PORT, () => {
-      console.log(`🚀  Server running on http://localhost:${PORT}`);
-    });
   } catch (err) {
     console.error('❌  Unable to connect to the database:', err.message);
-    process.exit(1);
+    console.warn('⚠️   Records / Export routes will be unavailable until DATABASE_URL is set.');
+    // Do NOT exit — let the rest of the app keep running.
   }
 })();
