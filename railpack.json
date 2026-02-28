@@ -1,0 +1,8 @@
+{
+  "build": {
+    "installCmd": "cd backend && npm install"
+  },
+  "deploy": {
+    "startCmd": "node backend/server.js"
+  }
+}
