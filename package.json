@@ -1,0 +1,13 @@
+{
+  "name": "weatherwise",
+  "version": "1.0.0",
+  "description": "WeatherWise - Weather App by Mrunal Kotkar. Root package for Railway deployment.",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node backend/server.js",
+    "postinstall": "cd backend && npm install"
+  },
+  "dependencies": {}
+}
