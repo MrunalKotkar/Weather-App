@@ -38,8 +38,9 @@ async function exportData(req, res, next) {
       wind_speed_mps: r.wind_speed,
       description: r.description,
       notes: r.notes,
-      created_at: r.created_at ? new Date(r.created_at).toISOString() : null,
-      updated_at: r.updated_at ? new Date(r.updated_at).toISOString() : null,
+      // Sequelize underscored:true maps created_at column → createdAt attribute
+      created_at: r.createdAt ? new Date(r.createdAt).toISOString() : (r.created_at ? new Date(r.created_at).toISOString() : null),
+      updated_at: r.updatedAt ? new Date(r.updatedAt).toISOString() : (r.updated_at ? new Date(r.updated_at).toISOString() : null),
     }));
 
     // ── JSON ──
